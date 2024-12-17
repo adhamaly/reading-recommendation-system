@@ -20,6 +20,12 @@ model User {
   role     UserRole
 }
 
+model Book {
+  id         Int    @id @default(autoincrement())
+  name       String
+  numOfPages Int
+}
+
 enum UserRole {
   ADMIN
   USER
