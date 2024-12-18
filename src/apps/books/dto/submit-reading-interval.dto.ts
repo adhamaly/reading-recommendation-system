@@ -2,16 +2,22 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsInt, IsNotEmpty } from 'class-validator';
 
-export class GetBooksDto {
+export class SubmitReadingInterval {
   @IsNotEmpty()
   @Transform(({ value }) => Number(value), { toClassOnly: true })
-  @IsInt({ message: 'page must be an integer' })
+  @IsInt({ message: 'limit must be an integer' })
   @ApiProperty({ type: Number })
-  page: number;
+  bookId: number;
 
   @IsNotEmpty()
   @Transform(({ value }) => Number(value), { toClassOnly: true })
   @IsInt({ message: 'limit must be an integer' })
   @ApiProperty({ type: Number })
-  limit: number;
+  startPage: number;
+
+  @IsNotEmpty()
+  @Transform(({ value }) => Number(value), { toClassOnly: true })
+  @IsInt({ message: 'limit must be an integer' })
+  @ApiProperty({ type: Number })
+  endPage: number;
 }

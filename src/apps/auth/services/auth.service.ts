@@ -28,7 +28,7 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(
       password,
-      Number(this.configService.get<Number>('SALT')),
+      Number(this.configService.get<number>('SALT')),
     );
 
     const createdUser = await this.prismaService.user.create({
@@ -74,9 +74,14 @@ export class AuthService {
     return this.jwtService.sign(
       { id: String(user.id), email: user.email, role: user.role },
       {
-        secret: this.configService.get<string>('USER_JWT_SECRET'),
+        secret:
+          user.role === UserRole.USER
+            ? this.configService.get<string>('USER_JWT_SECRET')
+            : this.configService.get<string>('ADMIN_JWT_SECRET'),
         expiresIn:
-          Number(this.configService.get<number>('USER_JWT_EXPIRY')) || 3600,
+          user.role === UserRole.USER
+            ? Number(this.configService.get<number>('USER_JWT_EXPIRY'))
+            : Number(this.configService.get<number>('ADMIN_JWT_EXPIRY')),
       },
     );
   }

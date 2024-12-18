@@ -11,14 +11,15 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { BooksService } from '../services/books.service';
-import { JwtVerifyGuard } from 'src/apps/auth/gurads/jwt-verify.guard';
-import { IsAdminGuard } from 'src/apps/auth/gurads/isAdmin.guard';
-import { Persona } from 'src/lib/decorators';
-import { UserJwtPersona } from 'src/lib/interfaces/jwt-persona';
+import { JwtVerifyGuard } from '../../auth/gurads/jwt-verify.guard';
+import { IsAdminGuard } from '../../auth/gurads/isAdmin.guard';
+import { Persona } from '../../../lib/decorators/params';
 import { CreateBookDto } from '../dto/create-book.dto';
 import { GetBooksDto } from '../dto/get-books.dto';
 import { BookIdParamDto } from '../dto/book-id-param.dto';
 import { UpdateBookDto } from '../dto/update-books.dto';
+import { SubmitReadingInterval } from '../dto/submit-reading-interval.dto';
+import { UserJwtPersona } from '../../../lib/interfaces/jwt-persona';
 
 @Controller('books')
 @ApiBearerAuth()
@@ -48,6 +49,30 @@ export class BooksController {
     return {
       success: true,
       data: result,
+    };
+  }
+
+  @Post('reading-intervals')
+  @UseGuards(JwtVerifyGuard)
+  async submitReadingIntervals(
+    @Persona() userJwtPersona: UserJwtPersona,
+    @Body() submitReadingInterval: SubmitReadingInterval,
+  ) {
+    await this.booksService.submitReadingIntervals(
+      userJwtPersona.id,
+      submitReadingInterval,
+    );
+    return {
+      success: true,
+    };
+  }
+
+  @Get('top')
+  @UseGuards(JwtVerifyGuard)
+  async getTopReadBooks() {
+    return {
+      success: true,
+      data: await this.booksService.getTopReadBooks(),
     };
   }
 

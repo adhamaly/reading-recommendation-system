@@ -14,16 +14,28 @@ datasource db {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  password String
-  role     UserRole
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  password         String
+  role             UserRole
+  readingIntervals ReadingInterval[]
 }
 
 model Book {
-  id         Int    @id @default(autoincrement())
-  name       String
-  numOfPages Int
+  id               Int               @id @default(autoincrement())
+  name             String
+  numOfPages       Int
+  readingIntervals ReadingInterval[]
+}
+
+model ReadingInterval {
+  id        Int  @id @default(autoincrement())
+  userId    Int
+  bookId    Int
+  startPage Int
+  endPage   Int
+  book      Book @relation(fields: [bookId], references: [id])
+  user      User @relation(fields: [userId], references: [id])
 }
 
 enum UserRole {
