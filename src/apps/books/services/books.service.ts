@@ -23,6 +23,11 @@ export class BooksService {
     });
   }
 
+  /**
+   *
+   * @param getBooksDto
+   * @returns Paginated lis of books
+   */
   async getBooks(getBooksDto: GetBooksDto) {
     const { page = 1, limit = 10 } = getBooksDto;
     const skip = (page - 1) * limit;
@@ -41,6 +46,7 @@ export class BooksService {
       limit: Number(limit),
     };
   }
+
   async getBookDetails({ bookId }: BookIdParamDto) {
     const book = await this.prismaService.book.findUnique({
       where: {
@@ -54,6 +60,7 @@ export class BooksService {
 
     return book;
   }
+
   async updateBookDetails(
     { bookId }: BookIdParamDto,
     updateBookDto: UpdateBookDto,
@@ -77,6 +84,11 @@ export class BooksService {
       },
     });
   }
+
+  /**
+   * Delete a book and associated reading intervals by its ID
+   * @param BookIdParamDto
+   */
   async deleteBook({ bookId }: BookIdParamDto) {
     const book = await this.prismaService.book.findUnique({
       where: {
@@ -88,11 +100,20 @@ export class BooksService {
       throw new NotFoundException('Book not found');
     }
 
-    await this.prismaService.book.delete({
-      where: {
-        id: Number(bookId),
-      },
-    });
+    // Perform a transactional delete of the book and its reading intervals
+    await this.prismaService.$transaction([
+      this.prismaService.book.delete({
+        where: {
+          id: Number(bookId),
+        },
+      }),
+
+      this.prismaService.readingInterval.deleteMany({
+        where: {
+          bookId: Number(bookId),
+        },
+      }),
+    ]);
   }
 
   async submitReadingIntervals(
@@ -127,7 +148,12 @@ export class BooksService {
     });
   }
 
+  /**
+   *
+   * @returns Top 5 most-read books based on reading intervals
+   */
   async getTopReadBooks() {
+    // Query raw SQL to calculate the number of unique pages read per book
     const rawResults = await this.prismaService.$queryRaw<
       { bookId: number; num_of_read_pages: number }[]
     >`
@@ -157,7 +183,7 @@ export class BooksService {
       },
     });
 
-    // Map unique pages read to book
+    // Map the number of pages read to each book
     const resultMap = rawResults.reduce((map, result) => {
       map[result.bookId] = result.num_of_read_pages;
       return map;

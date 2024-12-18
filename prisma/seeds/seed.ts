@@ -13,8 +13,6 @@ async function seedAdminAccount() {
     parseInt(process.env.SALT),
   );
 
-  console.log('Here');
-
   await prisma.user.create({
     data: {
       email: process.env.ADMIN_EMAIL,
@@ -26,6 +24,8 @@ async function seedAdminAccount() {
 
 async function main() {
   await seedAdminAccount();
+
+  console.log('Admin Account Seed successfully!');
 }
 
 main()
